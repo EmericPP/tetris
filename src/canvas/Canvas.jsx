@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {clearCanvas, drawCell, drawShape, getARandomShape} from './shapes/shapes'
 import {
-  cantMove, checkIfRowIsFilled,
+  cantMove,
   generateGrid,
   setAShapeAndUpdateGrid
 } from './logics/grid'
@@ -26,7 +26,6 @@ const Canvas = () => {
   const [{shape: currentShape, color: colorShape}, setCurrentShape] = useState(getARandomShape())
 
   const [grid, setGrid] = useState(null)
-  const [cellsToDraw, setCellsToDraw] = useState([])
 
 
 
@@ -39,6 +38,7 @@ const Canvas = () => {
 
 
 
+  const gridRef = useRef()
 
   useEffect(() => {
     if(ctx === null) {
@@ -48,31 +48,60 @@ const Canvas = () => {
     }
   }, []);
 
+
+
   useEffect(() => {
+    console.error('Emeric::Canvas::puet:: =>', )
     if(ctx) {
       clearCanvas(ctx)
-      setPositionOfShapeToCalcul(drawShape(ctx, currentShape[rotationIndex], shapePositionDraw, cellWidth, colorShape))
-      cellsToDraw.forEach((item) => {
-        drawCell(ctx, {x: item.posX, y: item.posY}, cellWidth, item.color)
-      })
-    }
 
-  }, [rotationIndex, ctx, shapePositionDraw]);
+      setPositionOfShapeToCalcul(drawShape(ctx, currentShape[rotationIndex], shapePositionDraw, cellWidth, colorShape))
+
+      const drawFilledCell = () => {
+        let linesCompleted = []
+        Array.from(grid.entries()).forEach(([lineKey, lines]) => {
+          let nbCellFilled = 0
+          // draw cells confirmed
+
+          Array.from(lines.cols.entries()).forEach(([colKey, col]) => {
+            if(col.fill === true) {
+              nbCellFilled ++
+              drawCell(ctx, {x: colKey, y: lineKey}, cellWidth, col.color)
+            }
+          })
+
+          if (lines.cols.size === nbCellFilled) {
+            linesCompleted.push(lineKey)
+          }
+
+        })
+        return linesCompleted
+      }
+
+      let linesCompleted2 = drawFilledCell()
+
+
+
+      if(linesCompleted2.length > 0) {
+        alert('tot')
+        linesCompleted2.forEach((yKey) => {
+          for (let i = yKey; i >= 0; i -= cellWidth) {
+            setGrid(grid.set(i, grid.get(i - cellWidth > 0 ? i - cellWidth : 0)))
+          }
+        })
+      }
+
+    }
+  }, [grid, rotationIndex, ctx, shapePositionDraw, colorShape, currentShape]);
+
 
   const initANewShape = () => {
-    const [gridUpdated, newCellsToDraw] = setAShapeAndUpdateGrid(grid, positionOfShapeToCalcul, colorShape)
-
-    checkIfRowIsFilled(grid)
-
-
+    const gridUpdated = setAShapeAndUpdateGrid(ctx, grid, positionOfShapeToCalcul, colorShape)
     setGrid(gridUpdated)
-    setCellsToDraw([...cellsToDraw, ...newCellsToDraw])
     setShapePositionDraw({x: zoneWidth / 2 - cellWidth * 1.5, y: 0})
     setRotationIndex(0)
     setCurrentShape(getARandomShape())
   }
-
-
 
   const handleKeyPress = (e) => {
     switch (e.key) {
@@ -81,8 +110,6 @@ const Canvas = () => {
 
         const futurePositionToCalcul = drawShape(null, currentShape[rotationIndex < currentShape.length - 1 ? rotationIndex + 1 : 0], shapePositionDraw, cellWidth)
 
-        console.error('Emeric::Canvas::handleKeyPress::futurePositionToCalcul =>', futurePositionToCalcul)
-        console.error('Emeric::Canvas::handleKeyPress::grid =>', grid)
 
         if(!futurePositionToCalcul.some((item) => item.x < 0)
           && !futurePositionToCalcul.some((item) => item.x >= zoneWidth)
@@ -97,17 +124,12 @@ const Canvas = () => {
         }
         break
       case 'ArrowRight':
-        console.error('Emeric::Canvas::handleKeyPress::positionOfShapeToCalcul =>', positionOfShapeToCalcul)
 
         if(!positionOfShapeToCalcul.some((item) => item.x + cellWidth === zoneWidth) && !cantMove(grid, positionOfShapeToCalcul, 'right')){
           setShapePositionDraw({...shapePositionDraw, x: shapePositionDraw.x + cellWidth})
         }
         break
       case 'ArrowDown':
-
-
-
-
         return cantMove(grid, positionOfShapeToCalcul, 'bottom')
         || positionOfShapeToCalcul.some((item) => item.y + cellWidth === zoneHeight)
             ? initANewShape()
@@ -115,7 +137,7 @@ const Canvas = () => {
 
     }
   }
-  
+
 
 
   return (
