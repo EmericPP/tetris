@@ -98,6 +98,7 @@ export const clearCanvas = (ctx) => {
 }
 
 export const drawShape = (ctx, shape, position, size, color) => {
+
   let pos = {x: position.x, y: position.y}
 
   const realShapePos = []
