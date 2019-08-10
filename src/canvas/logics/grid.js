@@ -30,10 +30,9 @@ export const setAShapeAndUpdateGrid = (ctx, grid, positionOfShapeToCalcul, color
 export const cantMove = (grid, positionOfShapeToCalcul, direction) => {
 
   return positionOfShapeToCalcul.some((item) => {
-    let cantMoveLeft = (grid.get(item.y).cols.get(item.x - cellWidth) && grid.get(item.y).cols.get(item.x - cellWidth).fill === true)
-    let cantMoveRight = (grid.get(item.y).cols.get(item.x + cellWidth) && grid.get(item.y).cols.get(item.x + cellWidth).fill === true)
-    let cantMoveBottom = (grid.get(item.y + cellWidth) && grid.get(item.y + cellWidth).cols.get(item.x).fill === true)
-
+    let cantMoveLeft = (grid.getIn([item.y, 'cols', item.x - cellWidth]) && grid.getIn([item.y, 'cols', item.x - cellWidth, 'fill']) === true)
+    let cantMoveRight = (grid.getIn([item.y, 'cols', item.x + cellWidth]) && grid.getIn([item.y, 'cols', item.x + cellWidth, 'fill']) === true)
+    let cantMoveBottom = (grid.get(item.y + cellWidth) && grid.getIn([item.y + cellWidth, 'cols', item.x, 'fill']) === true)
 
     switch (direction) {
       case 'left':
@@ -43,7 +42,7 @@ export const cantMove = (grid, positionOfShapeToCalcul, direction) => {
       case 'bottom':
         return cantMoveBottom
       default:
-        return (grid.get(item.y).cols.get(item.x).fill === true)
+        return (grid.getIn([item.y, 'cols', item.x, 'fill']) === true)
     }
 
 
