@@ -11,7 +11,7 @@ import {useInterval} from './hooks'
 
 
 export const zoneWidth = 330
-export const zoneHeight = 600
+export const zoneHeight = 660
 const nbCols = 11
 export const cellWidth = zoneWidth / nbCols
 const nbLines = zoneHeight / cellWidth
@@ -56,50 +56,58 @@ const Canvas = ({getScore, speed}) => {
 
   useEffect(() => {
     if(ctx && !gameOver) {
+
       clearCanvas(ctx)
 
       setPositionOfShapeToCalcul(drawShape(ctx, currentShape[rotationIndex], shapePositionDraw, cellWidth, colorShape))
 
       let linesCompleted = []
-      Array.from(grid.entries()).forEach(([lineKey, lines]) => {
+      grid.map((line, lineKey) => {
         let nbCellFilled = 0
         // draw cells confirmed
 
-        Array.from(lines.cols.entries()).forEach(([colKey, col]) => {
+        line.get('cols').map((col, colKey) => {
           if(col.fill === true) {
             nbCellFilled ++
             drawCell(ctx, {x: colKey, y: lineKey}, cellWidth, col.color)
           }
         })
 
-        if (lines.cols.size === nbCellFilled) {
+        if (line.get('cols').size === nbCellFilled) {
           linesCompleted.push(lineKey)
         }
       })
 
+
       if(linesCompleted.length > 0) {
         getScore(100 * linesCompleted.length)
-
+        let updatedGrid = grid
         linesCompleted.forEach((yKey) => {
           for (let i = yKey; i >= 0; i -= cellWidth) {
-            grid.set(i, grid.get(i - cellWidth > 0 ? i - cellWidth : 0))
+            updatedGrid = updatedGrid.set(i, updatedGrid.get(i - cellWidth > 0 ? i - cellWidth : 0))
           }
         })
 
-        setGrid(grid)
+        console.error('Emeric::Canvas::test:: =>', updatedGrid.toJS())
+        console.error('Emeric::Canvas::test:: =>', grid.toJS())
+
+
         clearCanvas(ctx)
 
-        Array.from(grid.entries()).forEach(([lineKey, lines]) => {
-          Array.from(lines.cols.entries()).forEach(([colKey, col]) => {
+        updatedGrid.map((line, lineKey) => {
+          line.get('cols').map((col, colKey) => {
             if(col.fill === true) {
+              console.error('Emeric::Canvas::yoplait:: =>', )
               drawCell(ctx, {x: colKey, y: lineKey}, cellWidth, col.color)
             }
           })
         })
+        setGrid(updatedGrid)
       }
 
+
     }
-  }, [ctx, grid, getScore, currentShape, rotationIndex, shapePositionDraw, colorShape, gameOver]);
+  }, [ctx, grid, currentShape, rotationIndex, shapePositionDraw, colorShape, gameOver]);
 
 
   useInterval(() => {
@@ -108,12 +116,15 @@ const Canvas = ({getScore, speed}) => {
     || positionOfShapeToCalcul.some((item) => item.y + cellWidth === zoneHeight)
       ? initANewShape()
       : setShapePositionDraw({...shapePositionDraw, y: shapePositionDraw.y + cellWidth})
-  }, gameOver ? null : 500)
+  }, gameOver ? null : speed)
 
 
 
   const initANewShape = () => {
     // bug here ?
+
+    console.error('Emeric::Canvas::initANewShape::grid =>', grid)
+
     setGrid(setAShapeAndUpdateGrid(ctx, grid, positionOfShapeToCalcul, colorShape))
     setShapePositionDraw({x: zoneWidth / 2 - cellWidth * 1.5, y: 0})
     setRotationIndex(0)
@@ -148,6 +159,10 @@ const Canvas = ({getScore, speed}) => {
           setShapePositionDraw({...shapePositionDraw, x: shapePositionDraw.x + cellWidth})
         }
         break
+      case 'Enter':
+        console.error('Emeric::Canvas::handleKeyPress::space =>')
+        setGameOver(!gameOver)
+        break
       case 'ArrowDown':
 
         // 1) some pour retourner
@@ -163,7 +178,7 @@ const Canvas = ({getScore, speed}) => {
   return (
     <div onKeyDown={(e) => handleKeyPress(e)} tabIndex="-1">
       <canvas
-        style={{border: '1px solid black'}}
+        style={{border: '6px solid black', background: 'black'}}
         ref={canvasRef}
         width={zoneWidth}
         height={zoneHeight}

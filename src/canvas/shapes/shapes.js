@@ -5,6 +5,7 @@ export const drawCell = (ctx, pos, size, color ) => {
 
   ctx.save()
   ctx.beginPath()
+  ctx.lineWidth = 6
   ctx.strokeStyle = '#000'
   ctx.rect(pos.x, pos.y, size, size)
   ctx.fill()

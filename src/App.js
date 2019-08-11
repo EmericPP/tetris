@@ -19,7 +19,9 @@ const App = () => {
         getScore={(score) => {
           console.error('Emeric::App::AAA:: =>', )
           setScore(currentScore + score)
-          setSpeed(currentScore % 300 === 0 ? currentSpeed : currentSpeed - 100)
+
+          let newSpeed = currentSpeed - 100 >= 100 ? currentSpeed - 100 : currentSpeed
+          setSpeed((currentScore % 300 === 0) ? currentSpeed : newSpeed)
         }}
       />
     </div>

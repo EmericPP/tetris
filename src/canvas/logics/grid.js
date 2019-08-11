@@ -12,18 +12,25 @@ export const generateGrid = (nbCols, nbLines, cellWidth) => {
     gridObj = gridObj.set(cellWidth * lineIndex, Map({cols, posy: cellWidth * lineIndex}))
   }
 
-  console.error('Emeric::grid::generateGrid::test =>', gridObj.toJS())
 
   return gridObj
 }
 
 export const setAShapeAndUpdateGrid = (ctx, grid, positionOfShapeToCalcul, color) => {
 
+
+
+  let newGrid = grid
+
   positionOfShapeToCalcul.forEach((item) => {
-    grid.setIn([item.y, 'cols', item.x, 'fill'], true)
-    grid.setIn([item.y, 'cols', item.x, 'color'], color)
+    newGrid = newGrid
+      .setIn([item.y, 'cols', item.x, 'fill'], true)
+      .setIn([item.y, 'cols', item.x, 'color'], color)
+    
   })
-  return grid
+
+
+  return newGrid
 }
 
 
