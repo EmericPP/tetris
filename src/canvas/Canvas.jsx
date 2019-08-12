@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useMemo} from 'react';
 import {clearCanvas, drawCell, drawShape, getARandomShape} from './shapes/shapes'
 import {
   cantMove,
@@ -107,13 +107,13 @@ const Canvas = ({getScore, speed}) => {
 
 
     }
-  }, [ctx, grid, currentShape, rotationIndex, shapePositionDraw, colorShape, gameOver]);
+  }, [ctx, grid, currentShape, rotationIndex, shapePositionDraw, colorShape, gameOver, getScore]);
 
 
   useInterval(() => {
 
     cantMove(grid, positionOfShapeToCalcul, 'bottom')
-    || positionOfShapeToCalcul.some((item) => item.y + cellWidth === zoneHeight)
+    || positionOfShapeToCalcul.some((item) => item.y + cellWidth >= zoneHeight)
       ? initANewShape()
       : setShapePositionDraw({...shapePositionDraw, y: shapePositionDraw.y + cellWidth})
   }, gameOver ? null : speed)
